@@ -32,10 +32,7 @@ Resources:
     Type: AWS::RedshiftServerless::Namespace
     Properties:
       NamespaceName: "nonprod-ns"
-      DbName:
-         Fn::Join:
-          - "_"
-          - [!Ref EnvType, !Ref DomainName, "dbap"]
+      DbName: "nonprod-dev"
       AdminUsername: !Ref AdminUsername
       AdminUserPassword: !Ref AdminUserPassword
       IamRoles: []  # Add IAM Role ARNs if needed
@@ -43,6 +40,12 @@ Resources:
         - userlog
         - connectionlog
         - useractivitylog
+      Tags:
+        - Key: EnvType
+          Value: !Ref EnvType
+        - Key: DomainName
+          Value: !Ref DomainName
+    
 
   RedshiftWorkgroup:
     Type: AWS::RedshiftServerless::Workgroup
