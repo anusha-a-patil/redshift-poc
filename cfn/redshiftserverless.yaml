@@ -29,7 +29,7 @@ Parameters:
   NSName:
     Type: String
     Description: The name of the domain
-    Default: "nonprod-ns"
+    Default: "nonprod-ns3"
 
 Conditions:
   NSvalidate: !Equals [ !Ref NSName, "yes" ]   
@@ -53,24 +53,24 @@ Resources:
         - Key: DomainName
           Value: !Ref DomainName
 
-  RedshiftNamespace2:
-    Type: AWS::RedshiftServerless::Namespace
-    Condition: NSvalidate    
-    Properties:
-      NamespaceName: "nonprod-ns"
-      DbName: "nonprod-dev2"
-      AdminUsername: !Ref AdminUsername
-      AdminUserPassword: !Ref AdminUserPassword
-      IamRoles: []  # Add IAM Role ARNs if needed
-      LogExports:
-        - userlog
-        - connectionlog
-        - useractivitylog
-      Tags:
-        - Key: EnvType
-          Value: !Ref EnvType
-        - Key: DomainName
-          Value: !Ref DomainName
+  # RedshiftNamespace2:
+  #   Type: AWS::RedshiftServerless::Namespace
+  #   Condition: NSvalidate    
+  #   Properties:
+  #     NamespaceName: "nonprod-ns"
+  #     DbName: "nonprod-dev2"
+  #     AdminUsername: !Ref AdminUsername
+  #     AdminUserPassword: !Ref AdminUserPassword
+  #     IamRoles: []  # Add IAM Role ARNs if needed
+  #     LogExports:
+  #       - userlog
+  #       - connectionlog
+  #       - useractivitylog
+  #     Tags:
+  #       - Key: EnvType
+  #         Value: !Ref EnvType
+  #       - Key: DomainName
+  #         Value: !Ref DomainName
 
   RedshiftNamespace3:
     Type: AWS::RedshiftServerless::Namespace
