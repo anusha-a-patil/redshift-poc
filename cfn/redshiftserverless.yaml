@@ -34,8 +34,8 @@ Resources:
       NamespaceName: "nonprod-ns"
       DbName:
          Fn::Join:
-          - "-"
-          - [!Ref EnvType, !Ref DomainName, "db"]
+          - "_"
+          - [!Ref EnvType, !Ref DomainName, "dbap"]
       AdminUsername: !Ref AdminUsername
       AdminUserPassword: !Ref AdminUserPassword
       IamRoles: []  # Add IAM Role ARNs if needed
