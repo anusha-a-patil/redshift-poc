@@ -50,9 +50,21 @@ Resources:
       WorkgroupName: "nonprod-workgroup"
       NamespaceName: !Ref RedshiftNamespace
       PubliclyAccessible: true
-      SecurityGroupIds: []
+      SecurityGroupIds: 
+        - !Ref RedshiftServerlessSecurityGroup
       SubnetIds: !Ref SubnetIds
       BaseCapacity: 8  # Measured in Redshift Processing Units (RPUs)
+
+  RedshiftServerlessSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: 'vpc-0e22305d886064b94'
+      GroupDescription: Security group for Redshift Serverless
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5439
+          ToPort: 5439
+          CidrIp: 0.0.0.0/0  # Note: Adjust as needed for your security requirements      
 
 Outputs:
   WorkgroupEndpoint:
