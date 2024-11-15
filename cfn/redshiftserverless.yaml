@@ -94,4 +94,4 @@ Outputs:
     Value: !If
       - CreateWorkGroup
       - !GetAtt RedshiftWorkgroup.Workgroup.Endpoint.Address  # Only output if workgroup is created
-      - Ref: "AWS::NoValue"
+      - "N/A"
