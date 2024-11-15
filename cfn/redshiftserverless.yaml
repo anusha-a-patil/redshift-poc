@@ -26,17 +26,17 @@ Parameters:
   SubnetIds:
     Description: Comma-separated list of subnet IDs for the Redshift Serverless workgroup
     Type: CommaDelimitedList
-  NSName:
-    Type: String
-    Description: The name of the domain
-    Default: "nonprod-ns3"
 
 Conditions:
-  NSvalidate: !Equals [ !Ref NSName, "yes" ]   
+  CreateNamespace: !Or
+    - !Equals [!Ref EnvType, "dev"]
+    - !Equals [!Ref EnvType, "uat"]
+    - !Equals [!Ref EnvType, "prod"]
 
 Resources:
   RedshiftNamespace:
     Type: AWS::RedshiftServerless::Namespace
+    Condition: CreateNamespace
     Properties:
       NamespaceName: "nonprod-ns"
       DbName: "nonprod-dev"
@@ -51,45 +51,7 @@ Resources:
         - Key: EnvType
           Value: !Ref EnvType
         - Key: DomainName
-          Value: !Ref DomainName
-
-  # RedshiftNamespace2:
-  #   Type: AWS::RedshiftServerless::Namespace
-  #   Condition: NSvalidate    
-  #   Properties:
-  #     NamespaceName: "nonprod-ns"
-  #     DbName: "nonprod-dev2"
-  #     AdminUsername: !Ref AdminUsername
-  #     AdminUserPassword: !Ref AdminUserPassword
-  #     IamRoles: []  # Add IAM Role ARNs if needed
-  #     LogExports:
-  #       - userlog
-  #       - connectionlog
-  #       - useractivitylog
-  #     Tags:
-  #       - Key: EnvType
-  #         Value: !Ref EnvType
-  #       - Key: DomainName
-  #         Value: !Ref DomainName
-
-  RedshiftNamespace3:
-    Type: AWS::RedshiftServerless::Namespace
-    Condition: NSvalidate    
-    Properties:
-      NamespaceName: "nonprod-ns3"
-      DbName: "nonprod-dev2"
-      AdminUsername: !Ref AdminUsername
-      AdminUserPassword: !Ref AdminUserPassword
-      IamRoles: []  # Add IAM Role ARNs if needed
-      LogExports:
-        - userlog
-        - connectionlog
-        - useractivitylog
-      Tags:
-        - Key: EnvType
-          Value: !Ref EnvType
-        - Key: DomainName
-          Value: !Ref DomainName                   
+          Value: !Ref DomainName               
     
   RedshiftWorkgroup:
     Type: AWS::RedshiftServerless::Workgroup
