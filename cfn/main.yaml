@@ -37,6 +37,7 @@ Resources:
         DomainName: !Ref DomainName
         AdminUsername: !Ref AdminUsername
         AdminUserPassword: !Ref AdminUserPassword
+        # NamespaceName: !Ref NamespaceName
         # VPCSecurityGroupIds: !Join [ ",", [!GetAtt RedshiftVPCStack.Outputs.SecurityGroupId]]
         SubnetIds: !Ref SubnetIds
         
