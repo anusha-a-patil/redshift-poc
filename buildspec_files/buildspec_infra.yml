@@ -23,8 +23,8 @@ phases:
         redshiftfilename="redshiftserverless.yaml"
         redshiftfile=$CODEBUILD_SRC_DIR/cfn/"${redshiftfilename}"
         echo $redshiftfile
-        aws s3 cp $redshiftfile s3://mycicd-bucket-ap3/cicd-files2/      
-        redshifturl=https://s3.amazonaws.com/mycicd-bucket-ap3/cicd-files2/redshiftserverless.yaml
+        aws s3 cp $redshiftfile s3://mycicd-bucket-ap2/cicd-files2/      
+        redshifturl=https://s3.amazonaws.com/mycicd-bucket-ap2/cicd-files2/redshiftserverless.yaml
         aws cloudformation deploy \
           --template-file $cfnfile \
           --stack-name redshift-stack \
