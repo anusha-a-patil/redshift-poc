@@ -70,9 +70,27 @@ Resources:
         - Key: EnvType
           Value: !Ref EnvType
         - Key: DomainName
-          Value: !Ref DomainName          
-    
+          Value: !Ref DomainName
 
+  RedshiftNamespace3:
+    Type: AWS::RedshiftServerless::Namespace
+    Condition: NSvalidate    
+    Properties:
+      NamespaceName: "nonprod-ns3"
+      DbName: "nonprod-dev2"
+      AdminUsername: !Ref AdminUsername
+      AdminUserPassword: !Ref AdminUserPassword
+      IamRoles: []  # Add IAM Role ARNs if needed
+      LogExports:
+        - userlog
+        - connectionlog
+        - useractivitylog
+      Tags:
+        - Key: EnvType
+          Value: !Ref EnvType
+        - Key: DomainName
+          Value: !Ref DomainName                   
+    
   RedshiftWorkgroup:
     Type: AWS::RedshiftServerless::Workgroup
     Properties:
