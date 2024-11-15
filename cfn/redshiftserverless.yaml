@@ -69,7 +69,7 @@ Resources:
       WorkgroupName: "nonprod-workgroup"
       NamespaceName: !If
         - CreateNamespace
-        - !Ref NamespaceName  # Reference only if the Namespace is created
+        - !Ref RedshiftNamespace  # Reference only if the Namespace is created
         - Ref: "AWS::NoValue"  # If namespace is not created, pass AWS::NoValue to avoid invalid reference      
       PubliclyAccessible: true
       SecurityGroupIds: 
