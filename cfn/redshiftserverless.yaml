@@ -6,7 +6,9 @@ Parameters:
     Type: String
     Default: "dev"
     Description: The environment type (e.g., prod, dev)
-
+  RedshiftEnvironment:
+    Type: String
+    Description: 'Environment name of the Redshift instances'
   DomainName:
     Type: String
     Description: The name of the domain  
@@ -46,7 +48,7 @@ Resources:
     Type: AWS::RedshiftServerless::Namespace
     Condition: CreateNamespace
     Properties:
-      NamespaceName: !NamespaceName
+      NamespaceName: !Sub "${RedshiftEnvironment}-ns"
       DbName: "nonprod-dev"
       AdminUsername: !Ref AdminUsername
       AdminUserPassword: !Ref AdminUserPassword
@@ -59,13 +61,13 @@ Resources:
         - Key: EnvType
           Value: !Ref EnvType
         - Key: DomainName
-          Value: !Ref DomainName           
+          Value: !Ref DomainName
     
   RedshiftWorkgroup:
     Type: AWS::RedshiftServerless::Workgroup
-    Condition: CreateWorkGroup    
+    Condition: CreateWorkGroup
     Properties:
-      WorkgroupName: "nonprod-workgroup"
+      WorkgroupName: !Sub "${RedshiftEnvironment}-workgroup"
       NamespaceName: !If
         - CreateNamespace
         - !Ref RedshiftNamespace  # Reference only if the Namespace is created
