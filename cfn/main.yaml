@@ -26,6 +26,19 @@ Parameters:
     Type: String
     Description: 'Subnet Ids'
     Default: subnet-0e02df7b9e58e3960,subnet-05d7a985f0bdf9b64,subnet-04fc4b2eacf4f1df4
+  # NamespaceName:
+  #   Type: String
+  #   Default: 
+  #   Description: Name of the Redshift Serverless
+
+Mappings:
+  EnvironmentMap:
+    dev:
+      NamespaceName: dev-namespace
+    test:
+      NamespaceName: uat-namespace
+    prod:
+      NamespaceName: prod-namespace     
 
 Resources:
   RedshiftServerlessStack:
@@ -37,7 +50,7 @@ Resources:
         DomainName: !Ref DomainName
         AdminUsername: !Ref AdminUsername
         AdminUserPassword: !Ref AdminUserPassword
-        # NamespaceName: !Ref NamespaceName
+        NamespaceName: !FindInMap [EnvironmentMap, !Ref EnvType, NamespaceName]
         # VPCSecurityGroupIds: !Join [ ",", [!GetAtt RedshiftVPCStack.Outputs.SecurityGroupId]]
         SubnetIds: !Ref SubnetIds
         

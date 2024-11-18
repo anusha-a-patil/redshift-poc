@@ -27,10 +27,9 @@ Parameters:
     Description: Comma-separated list of subnet IDs for the Redshift Serverless workgroup
     Type: CommaDelimitedList
 
-  # NamespaceName:
-  #   Type: String
-  #   Default: "nonprod-ns"
-  #   Description: Name of the Redshift Serverless     
+  NamespaceName:
+    Type: String
+    Description: Name of the Redshift Serverless     
 
 Conditions:
   CreateNamespace: !Or
@@ -47,7 +46,7 @@ Resources:
     Type: AWS::RedshiftServerless::Namespace
     Condition: CreateNamespace
     Properties:
-      NamespaceName: "nonprod-ns"
+      NamespaceName: !NamespaceName
       DbName: "nonprod-dev"
       AdminUsername: !Ref AdminUsername
       AdminUserPassword: !Ref AdminUserPassword
