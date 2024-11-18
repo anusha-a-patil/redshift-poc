@@ -6,7 +6,7 @@ Parameters:
     Type: String
     Default: "dev"
     Description: The environment type (e.g., prod, dev)
-  RedshiftEnvironment1:
+  RedshiftEnvironment:
     Type: String
     Default: "nonprod"
     AllowedValues:
@@ -45,13 +45,13 @@ Parameters:
 
 Conditions:
   CreateNamespace: !Or
-    - !Equals [!Ref RedshiftEnvironment1, "dev"]
-    - !Equals [!Ref RedshiftEnvironment1, "uat"]
-    - !Equals [!Ref RedshiftEnvironment1, "prod"]
+    - !Equals [!Ref RedshiftEnvironment, "nonprod"]
+    - !Equals [!Ref RedshiftEnvironment, "uat"]
+    - !Equals [!Ref RedshiftEnvironment, "prod"]
   CreateWorkGroup: !Or
-    - !Equals [!Ref RedshiftEnvironment1, "dev"]
-    - !Equals [!Ref RedshiftEnvironment1, "uat"]
-    - !Equals [!Ref RedshiftEnvironment1, "prod"]    
+    - !Equals [!Ref RedshiftEnvironment, "nonprod"]
+    - !Equals [!Ref RedshiftEnvironment, "uat"]
+    - !Equals [!Ref RedshiftEnvironment, "prod"]
     
 Resources:
   RedshiftNamespace:
