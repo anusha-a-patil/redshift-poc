@@ -82,6 +82,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: 'vpc-0e22305d886064b94'
+      GroupName: !Sub "${RedshiftEnvironment}-sg"
       GroupDescription: Security group for Redshift Serverless
       SecurityGroupIngress:
         - IpProtocol: tcp
