@@ -40,13 +40,13 @@ Parameters:
 
 Conditions:
   CreateNamespace: !Or
-    - !Equals [!Ref EnvType, "dev"]
-    - !Equals [!Ref EnvType, "uat"]
-    - !Equals [!Ref EnvType, "prod"]
+    - !Equals [!Ref RedshiftEnvironment, "dev"]
+    - !Equals [!Ref RedshiftEnvironment, "uat"]
+    - !Equals [!Ref RedshiftEnvironment, "prod"]
   CreateWorkGroup: !Or
-    - !Equals [!Ref EnvType, "dev"]
-    - !Equals [!Ref EnvType, "uat"]
-    - !Equals [!Ref EnvType, "prod"]    
+    - !Equals [!Ref RedshiftEnvironment, "dev"]
+    - !Equals [!Ref RedshiftEnvironment, "uat"]
+    - !Equals [!Ref RedshiftEnvironment, "prod"]    
     
 Resources:
   RedshiftNamespace:
@@ -72,7 +72,7 @@ Resources:
     Type: AWS::RedshiftServerless::Workgroup
     Condition: CreateWorkGroup
     Properties:
-      WorkgroupName: "nonprod-workgroup"
+      WorkgroupName: !Ref WorkgroupName
       NamespaceName: !If
         - CreateNamespace
         - !Ref RedshiftNamespace  # Reference only if the Namespace is created
@@ -102,3 +102,11 @@ Outputs:
       - CreateWorkGroup
       - !GetAtt RedshiftWorkgroup.Workgroup.Endpoint.Address  # Only output if workgroup is created
       - "N/A"
+  ConditionStatus:
+    Description: Status of conditions
+    Value: !Join 
+      - ''
+      - - 'CreateNamespace: '
+        - !If [CreateNamespace, 'true', 'false']
+        - ', CreateWorkGroup: '
+        - !If [CreateWorkGroup, 'true', 'false']      
