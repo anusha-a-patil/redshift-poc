@@ -29,9 +29,14 @@ Parameters:
     Description: Comma-separated list of subnet IDs for the Redshift Serverless workgroup
     Type: CommaDelimitedList
 
-  # NamespaceName:
-  #   Type: String
-  #   Description: Name of the Redshift Serverless     
+  NamespaceName:
+    Type: String
+    Description: Name of the Redshift Serverless  
+
+  WorkgroupName:
+    Type: String
+    Description: Name of the Redshift Serverless workgroup  
+
 
 Conditions:
   CreateNamespace: !Or
@@ -48,7 +53,7 @@ Resources:
     Type: AWS::RedshiftServerless::Namespace
     Condition: CreateNamespace
     Properties:
-      NamespaceName: !Sub "${RedshiftEnvironment}-ns"
+      NamespaceName: !Ref NamespaceName
       DbName: "nonprod-dev"
       AdminUsername: !Ref AdminUsername
       AdminUserPassword: !Ref AdminUserPassword
@@ -67,7 +72,7 @@ Resources:
     Type: AWS::RedshiftServerless::Workgroup
     Condition: CreateWorkGroup
     Properties:
-      WorkgroupName: !Sub "${RedshiftEnvironment}-workgroup"
+      WorkgroupName: "nonprod-workgroup"
       NamespaceName: !If
         - CreateNamespace
         - !Ref RedshiftNamespace  # Reference only if the Namespace is created
@@ -82,7 +87,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: 'vpc-0e22305d886064b94'
-      GroupName: !Sub "${RedshiftEnvironment}-sg"
+      GroupName: !Sub "${EnvType}-sg"
       GroupDescription: Security group for Redshift Serverless
       SecurityGroupIngress:
         - IpProtocol: tcp

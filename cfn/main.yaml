@@ -34,19 +34,18 @@ Parameters:
          - "uat"
          - "prod"
     Description: 'Environment name of the Redshift instances'   
-  # NamespaceName:
-  #   Type: String
-  #   Default: 
-  #   Description: Name of the Redshift Serverless
 
-# Mappings:
-#   EnvironmentMap:
-#     dev:
-#       NamespaceName: dev-namespace
-#     uat:
-#       NamespaceName: uat-namespace
-#     prod:
-#       NamespaceName: prod-namespace     
+Mappings:
+  EnvironmentMapping:
+    dev:
+      Namespace: 'dev-ns'
+      Workgroup: 'dev-workgroup'
+    uat:
+      Namespace: 'nonprod-uat-ns'
+      Workgroup: 'nonprod-uat-workgroup'
+    prod:
+      Namespace: 'prod-ns'
+      Workgroup: 'prod-workgroup'  
 
 Resources:
   RedshiftServerlessStack:
@@ -59,7 +58,8 @@ Resources:
         AdminUsername: !Ref AdminUsername
         AdminUserPassword: !Ref AdminUserPassword
         RedshiftEnvironment: !Ref RedshiftEnvironment
-        # NamespaceName: !FindInMap [EnvironmentMap, !Ref EnvType, NamespaceName]
+        NamespaceName: !FindInMap [EnvironmentMapping, !Ref RedshiftEnvironment, Namespace]
+        WorkgroupName: !FindInMap [EnvironmentMapping, !Ref RedshiftEnvironment, Workgroup]
         # VPCSecurityGroupIds: !Join [ ",", [!GetAtt RedshiftVPCStack.Outputs.SecurityGroupId]]
         SubnetIds: !Ref SubnetIds
         
