@@ -33,7 +33,15 @@ Parameters:
          - "nonprod"
          - "uat"
          - "prod"
-    Description: 'Environment name of the Redshift instances'   
+    Description: 'Environment name of the Redshift instances'
+  RedshiftEnvironment1:
+    Type: String
+    Default: "nonprod"
+    AllowedValues:
+         - "nonprod"
+         - "uat"
+         - "prod"
+    Description: 'Environment name of the Redshift instances'      
 
 Mappings:
   EnvironmentMapping:
@@ -57,7 +65,7 @@ Resources:
         DomainName: !Ref DomainName
         AdminUsername: !Ref AdminUsername
         AdminUserPassword: !Ref AdminUserPassword
-        RedshiftEnvironment: !Ref RedshiftEnvironment
+        RedshiftEnvironment1: !Ref RedshiftEnvironment1
         NamespaceName: !FindInMap [EnvironmentMapping, !Ref RedshiftEnvironment, Namespace]
         WorkgroupName: !FindInMap [EnvironmentMapping, !Ref RedshiftEnvironment, Workgroup]
         # VPCSecurityGroupIds: !Join [ ",", [!GetAtt RedshiftVPCStack.Outputs.SecurityGroupId]]
