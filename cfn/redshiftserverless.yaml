@@ -8,6 +8,11 @@ Parameters:
     Description: The environment type (e.g., prod, dev)
   RedshiftEnvironment:
     Type: String
+    Default: "nonprod"
+    AllowedValues:
+      - "nonprod"
+      - "uat"
+      - "prod"
     Description: 'Environment name of the Redshift instances'
   DomainName:
     Type: String
