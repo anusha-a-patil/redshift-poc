@@ -5,6 +5,10 @@ Parameters:
   EnvType:
     Type: String
     Default: "dev"
+    AllowedValues:
+      - "dev"
+      - "uat"
+      - "prod"
     Description: The environment type (e.g., prod, dev)
   DomainName:
     Type: String
@@ -35,7 +39,7 @@ Mappings:
   EnvironmentMap:
     dev:
       NamespaceName: dev-namespace
-    test:
+    uat:
       NamespaceName: uat-namespace
     prod:
       NamespaceName: prod-namespace     
