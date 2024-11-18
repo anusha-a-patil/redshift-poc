@@ -58,7 +58,7 @@ Resources:
         DomainName: !Ref DomainName
         AdminUsername: !Ref AdminUsername
         AdminUserPassword: !Ref AdminUserPassword
-        6 u: !Ref RedshiftEnvironment
+        RedshiftEnvironment: !Ref RedshiftEnvironment
         # NamespaceName: !FindInMap [EnvironmentMap, !Ref EnvType, NamespaceName]
         # VPCSecurityGroupIds: !Join [ ",", [!GetAtt RedshiftVPCStack.Outputs.SecurityGroupId]]
         SubnetIds: !Ref SubnetIds
