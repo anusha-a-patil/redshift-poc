@@ -73,5 +73,7 @@ Resources:
         WorkgroupName: !FindInMap [EnvironmentMapping, !Ref RedshiftEnvironment, Namespace]
         NamespaceName: !FindInMap [EnvironmentMapping, !Ref RedshiftEnvironment, Namespace]
         EnvType: !Ref EnvType
+        DatabaseUser: !Ref AdminUsername
+        DatabasePassword: !Ref AdminUserPassword 
         
             

@@ -11,6 +11,13 @@ Parameters:
   EnvType:
     Type: String
     Description: Environment type
+  DatabaseUser:
+    Type: String
+    Description: Database User Name
+  DatabasePassword:
+    Type: String
+    Description: Database Password
+
 
 Resources:
   LambdaExecutionRole:
@@ -46,57 +53,50 @@ Resources:
       Code:
         ZipFile: |
           import boto3
+          import json
+          import os
           import cfnresponse
-          import time
           
-          def handler(event, context):
+          def lambda_handler(event, context):
               try:
-                  if event['RequestType'] in ['Create', 'Update']:
-                      client = boto3.client('redshift-data')
-                      
-                      # List of databases to create
-                      databases = [
-                          'sit_db',
-                          'st_db',
-                      ]
-                      
-                      for db in databases:
-                          try:
-                              response = client.execute_statement(
-                                  WorkgroupName=event['ResourceProperties']['WorkgroupName'],
-                                  Database='nonprod-db',  # use your initial database
-                                  Sql=f"CREATE DATABASE {db};"
-                              )
-                              
-                              # Wait for statement completion
-                              while True:
-                                  status = client.describe_statement(Id=response['Id'])
-                                  if status['Status'] in ['FINISHED', 'FAILED', 'ABORTED']:
-                                      break
-                                  time.sleep(2)
-                              
-                              if status['Status'] != 'FINISHED':
-                                  print(f"Failed to create database {db}: {status}")
-                          except Exception as e:
-                              print(f"Error creating database {db}: {str(e)}")
-                              # Continue with next database even if one fails
-                              continue
-                      
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
-                  elif event['RequestType'] == 'Delete':
-                      # Optionally handle cleanup
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+                  # Get parameters from the CloudFormation custom resource request
+                  namespace_name = event['ResourceProperties']['NamespaceName']
+                  database_name = event['ResourceProperties']['DatabaseName']
+                  db_user = event['ResourceProperties']['DatabaseUser']
+                  db_password = event['ResourceProperties']['DatabasePassword']
+
+                  # SQL query to create a new database
+                  create_db_query = f"CREATE DATABASE {database_name};"
+        
+                  # Use Redshift Data API to run the SQL query                  
+                  response = client.execute_statement(
+                      ClusterIdentifier=namespace_name,  # The Redshift cluster or serverless namespace ID
+                      Database="nonprod-dev",  # Connect to a valid database
+                      SecretArn=os.environ['REDSHIFT_SECRET_ARN'],  # The ARN of your secret containing DB credentials
+                      Sql=create_db_query
+                  )
+                  return {
+                      'Status': 'SUCCESS',
+                      'PhysicalResourceId': database_name,
+                      'Data': {'DatabaseName': database_name}
+                  }
               except Exception as e:
-                  print(f"Error: {str(e)}")
-                  cfnresponse.send(event, context, cfnresponse.FAILED, {})
+                  print(e)
+                  return {
+                      'Status': 'FAILED',
+                      'Reason': str(e)
+                  }
 
   CreateDatabases:
     Type: Custom::CreateDatabases
+    DependsOn: CreateDatabasesFunction
     Properties:
       ServiceToken: !GetAtt CreateDatabasesFunction.Arn
       WorkgroupName: !Ref WorkgroupName
       NamespaceName: !Ref NamespaceName
       EnvType: !Ref EnvType
+      DatabaseUser: !Ref DatabaseUser
+      DatabasePassword: !Ref DatabasePassword
 
 Outputs:
   DatabasesCreated:
