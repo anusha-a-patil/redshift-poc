@@ -4,7 +4,7 @@ Description: CloudFormation template to create Amazon Redshift Serverless resour
 Parameters:
   EnvType:
     Type: String
-    Default: "dev"
+    Default: "sit"
     Description: The environment type (e.g., prod, dev)
   DomainName:
     Type: String

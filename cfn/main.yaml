@@ -4,7 +4,7 @@ Description: CloudFormation template to create an S3 bucket
 Parameters:
   EnvType:
     Type: String
-    Default: "dev"
+    Default: "sit"
     Description: The environment type (e.g., prod, dev)
   DomainName:
     Type: String

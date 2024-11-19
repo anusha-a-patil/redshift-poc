@@ -28,7 +28,7 @@ phases:
         aws cloudformation deploy \
           --template-file $cfnfile \
           --stack-name redshift-stack \
-          --parameter-overrides EnvType="${env}" DomainName="${domain}" RedshiftEnvironment="nonprod" redshiftPath="${redshifturl}" \
+          --parameter-overrides EnvType="{env}" DomainName="${domain}" RedshiftEnvironment="nonprod" redshiftPath="${redshifturl}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
   post_build:
     commands:
