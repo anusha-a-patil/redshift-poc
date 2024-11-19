@@ -78,7 +78,7 @@ Resources:
       NamespaceName: !If
         - CreateNamespace
         - !Ref RedshiftNamespace  # Reference only if the Namespace is created
-        - !Ref: "AWS::NoValue"  # If namespace is not created, pass AWS::NoValue to avoid invalid reference      
+        - !Ref "AWS::NoValue"  # If namespace is not created, pass AWS::NoValue to avoid invalid reference      
       PubliclyAccessible: true
       SecurityGroupIds: 
         - !Ref RedshiftServerlessSecurityGroup
