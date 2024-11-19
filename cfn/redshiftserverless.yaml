@@ -51,6 +51,7 @@ Resources:
     Condition: CreateNamespace
     Properties:
       NamespaceName: !Ref NamespaceName
+      DbName: "nonprod-db"
       AdminUsername: !Ref AdminUsername
       AdminUserPassword: !Ref AdminUserPassword
       IamRoles: []  # Add IAM Role ARNs if needed
@@ -62,13 +63,7 @@ Resources:
         - Key: EnvType
           Value: !Ref EnvType
         - Key: DomainName
-          Value: !Ref DomainName         
-
-  Database:
-    Type: AWS::RedshiftServerless::Database
-    Properties:
-      DatabaseName: !Sub "${DomainName}-${EnvType}-db"
-      NamespaceName: !Ref NamespaceName
+          Value: !Ref DomainName
 
   RedshiftWorkgroup:
     Type: AWS::RedshiftServerless::Workgroup
