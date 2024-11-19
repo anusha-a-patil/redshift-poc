@@ -27,10 +27,10 @@ phases:
         redshifturl=https://s3.amazonaws.com/mycicd-bucket-ap2/cicd-files2/redshiftserverless.yaml
         aws cloudformation deploy \
           --template-file $cfnfile \
-          --stack-name redshift-stack \
+          --stack-name redshift-stack-sit \
           --parameter-overrides EnvType="{env}" DomainName="${domain}" RedshiftEnvironment="nonprod" redshiftPath="${redshifturl}" \
           --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
   post_build:
     commands:
-      - aws cloudformation describe-stack-events --stack-name redshift-stack
+      - aws cloudformation describe-stack-events --stack-name redshift-stack-sit
       - echo Build complete
