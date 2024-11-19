@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creates additional databases in Redshift Serverless
+
+Parameters:
+  WorkgroupName:
+    Type: String
+    Description: Name of the Redshift Serverless workgroup
+  NamespaceName:
+    Type: String
+    Description: Name of the Redshift Serverless namespace
+  EnvType:
+    Type: String
+    Description: Environment type
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: RedshiftDataAPI
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - redshift-data:ExecuteStatement
+                  - redshift-data:DescribeStatement
+                Resource: '*'
+
+  CreateDatabasesFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.9
+      Handler: index.handler
+      Timeout: 300
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          import time
+          
+          def handler(event, context):
+              try:
+                  if event['RequestType'] in ['Create', 'Update']:
+                      client = boto3.client('redshift-data')
+                      
+                      # List of databases to create
+                      databases = [
+                          'sit_db',
+                          'st_db',
+                      ]
+                      
+                      for db in databases:
+                          try:
+                              response = client.execute_statement(
+                                  WorkgroupName=event['ResourceProperties']['WorkgroupName'],
+                                  Database='nonprod-db',  # use your initial database
+                                  Sql=f"CREATE DATABASE {db};"
+                              )
+                              
+                              # Wait for statement completion
+                              while True:
+                                  status = client.describe_statement(Id=response['Id'])
+                                  if status['Status'] in ['FINISHED', 'FAILED', 'ABORTED']:
+                                      break
+                                  time.sleep(2)
+                              
+                              if status['Status'] != 'FINISHED':
+                                  print(f"Failed to create database {db}: {status}")
+                          except Exception as e:
+                              print(f"Error creating database {db}: {str(e)}")
+                              # Continue with next database even if one fails
+                              continue
+                      
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+                  elif event['RequestType'] == 'Delete':
+                      # Optionally handle cleanup
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              except Exception as e:
+                  print(f"Error: {str(e)}")
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {})
+
+  CreateDatabases:
+    Type: Custom::CreateDatabases
+    Properties:
+      ServiceToken: !GetAtt CreateDatabasesFunction.Arn
+      WorkgroupName: !Ref WorkgroupName
+      NamespaceName: !Ref NamespaceName
+      EnvType: !Ref EnvType
+
+Outputs:
+  DatabasesCreated:
+    Description: Indicates that databases were created
+    Value: 'Databases creation process completed'

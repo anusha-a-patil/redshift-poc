@@ -22,6 +22,9 @@ Parameters:
   redshiftPath:
     Type: String
     Description: 'S3 URL of the nested stack template'
+  redshiftdbPath:
+    Type: String
+    Description: 'S3 URL of the nested stack template'    
   SubnetIds:
     Type: String
     Description: 'Subnet Ids'
@@ -61,5 +64,14 @@ Resources:
         WorkgroupName: !FindInMap [EnvironmentMapping, !Ref RedshiftEnvironment, Workgroup]
         # VPCSecurityGroupIds: !Join [ ",", [!GetAtt RedshiftVPCStack.Outputs.SecurityGroupId]]
         SubnetIds: !Ref SubnetIds
+
+  RedshiftDatabases:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref redshiftdbPath
+      Parameters:
+        WorkgroupName: !FindInMap [EnvironmentMapping, !Ref RedshiftEnvironment, Namespace]
+        NamespaceName: !FindInMap [EnvironmentMapping, !Ref RedshiftEnvironment, Namespace]
+        EnvType: !Ref EnvType
         
             
