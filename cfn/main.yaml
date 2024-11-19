@@ -45,7 +45,7 @@ Mappings:
       Workgroup: 'nonprod-uat-workgroup'
     prod:
       Namespace: 'prod-ns'
-      Workgroup: 'prod-workgroup'  
+      Workgroup: 'prod-workgroup'
 
 Resources:
   RedshiftServerlessStack:
@@ -57,7 +57,6 @@ Resources:
         DomainName: !Ref DomainName
         AdminUsername: !Ref AdminUsername
         AdminUserPassword: !Ref AdminUserPassword
-        RedshiftEnvironment: !Ref RedshiftEnvironment
         NamespaceName: !FindInMap [EnvironmentMapping, !Ref RedshiftEnvironment, Namespace]
         WorkgroupName: !FindInMap [EnvironmentMapping, !Ref RedshiftEnvironment, Workgroup]
         # VPCSecurityGroupIds: !Join [ ",", [!GetAtt RedshiftVPCStack.Outputs.SecurityGroupId]]

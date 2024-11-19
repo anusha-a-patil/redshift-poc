@@ -6,14 +6,6 @@ Parameters:
     Type: String
     Default: "dev"
     Description: The environment type (e.g., prod, dev)
-  RedshiftEnvironment:
-    Type: String
-    Default: "nonprod"
-    AllowedValues:
-      - "nonprod"
-      - "uat"
-      - "prod"
-    Description: 'Environment name of the Redshift instances'
   DomainName:
     Type: String
     Description: The name of the domain  
@@ -45,13 +37,13 @@ Parameters:
 
 Conditions:
   CreateNamespace: !Or
-    - !Equals [!Ref RedshiftEnvironment, "nonprod"]
-    - !Equals [!Ref RedshiftEnvironment, "uat"]
-    - !Equals [!Ref RedshiftEnvironment, "prod"]
+    - !Equals [!Ref EnvType, "dev"]
+    - !Equals [!Ref EnvType, "uat"]
+    - !Equals [!Ref EnvType, "prod"]
   CreateWorkGroup: !Or
-    - !Equals [!Ref RedshiftEnvironment, "nonprod"]
-    - !Equals [!Ref RedshiftEnvironment, "uat"]
-    - !Equals [!Ref RedshiftEnvironment, "prod"]
+    - !Equals [!Ref EnvType, "dev"]
+    - !Equals [!Ref EnvType, "uat"]
+    - !Equals [!Ref EnvType, "prod"]
     
 Resources:
   RedshiftNamespace:
@@ -59,7 +51,6 @@ Resources:
     Condition: CreateNamespace
     Properties:
       NamespaceName: !Ref NamespaceName
-      DbName: "nonprod-dev"
       AdminUsername: !Ref AdminUsername
       AdminUserPassword: !Ref AdminUserPassword
       IamRoles: []  # Add IAM Role ARNs if needed
@@ -71,17 +62,23 @@ Resources:
         - Key: EnvType
           Value: !Ref EnvType
         - Key: DomainName
-          Value: !Ref DomainName
-    
+          Value: !Ref DomainName         
+
+  Database:
+    Type: AWS::RedshiftServerless::Database
+    Properties:
+      DatabaseName: !Sub "${DomainName}-${EnvType}-db"
+      NamespaceName: !Ref NamespaceName
+
   RedshiftWorkgroup:
     Type: AWS::RedshiftServerless::Workgroup
-    Condition: CreateWorkGroup
+    Condition: CreateWorkGroup   
     Properties:
       WorkgroupName: !Ref WorkgroupName
       NamespaceName: !If
         - CreateNamespace
         - !Ref RedshiftNamespace  # Reference only if the Namespace is created
-        - Ref: "AWS::NoValue"  # If namespace is not created, pass AWS::NoValue to avoid invalid reference      
+        - !Ref: "AWS::NoValue"  # If namespace is not created, pass AWS::NoValue to avoid invalid reference      
       PubliclyAccessible: true
       SecurityGroupIds: 
         - !Ref RedshiftServerlessSecurityGroup
