@@ -1,22 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Creates additional databases in Redshift Serverless
 
-Parameters:
-  WorkgroupName:
-    Type: String
-    Description: Name of the Redshift Serverless workgroup
-  NamespaceName:
-    Type: String
-    Description: Name of the Redshift Serverless namespace
-  EnvType:
-    Type: String
-    Description: Environment type
-  DatabaseUser:
-    Type: String
-    Description: Database User Name
-  DatabasePassword:
-    Type: String
-    Description: Database Password
+# Parameters:
+#   WorkgroupName:
+#     Type: String
+#     Description: Name of the Redshift Serverless workgroup
+#   NamespaceName:
+#     Type: String
+#     Description: Name of the Redshift Serverless namespace
+#   EnvType:
+#     Type: String
+#     Description: Environment type
+#   DatabaseUser:
+#     Type: String
+#     Description: Database User Name
+#   DatabasePassword:
+#     Type: String
+#     Description: Database Password
 
 
 Resources:
@@ -52,51 +52,25 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
         ZipFile: |
-          import boto3
           import json
-          import os
-          import cfnresponse
           
           def lambda_handler(event, context):
-              try:
-                  # Get parameters from the CloudFormation custom resource request
-                  namespace_name = event['ResourceProperties']['NamespaceName']
-                  database_name = event['ResourceProperties']['DatabaseName']
-                  db_user = event['ResourceProperties']['DatabaseUser']
-                  db_password = event['ResourceProperties']['DatabasePassword']
-
-                  # SQL query to create a new database
-                  create_db_query = f"CREATE DATABASE {database_name};"
-        
-                  # Use Redshift Data API to run the SQL query                  
-                  response = client.execute_statement(
-                      ClusterIdentifier=namespace_name,  # The Redshift cluster or serverless namespace ID
-                      Database="nonprod-dev",  # Connect to a valid database
-                      SecretArn=os.environ['REDSHIFT_SECRET_ARN'],  # The ARN of your secret containing DB credentials
-                      Sql=create_db_query
-                  )
-                  return {
-                      'Status': 'SUCCESS',
-                      'PhysicalResourceId': database_name,
-                      'Data': {'DatabaseName': database_name}
-                  }
-              except Exception as e:
-                  print(e)
-                  return {
-                      'Status': 'FAILED',
-                      'Reason': str(e)
-                  }
+            # Return a simple message as a response# Return a simple message as a response
+              return {
+                  'statusCode': 200,
+                  'body': json.dumps('Hello')
+              }            
 
   CreateDatabases:
     Type: Custom::CreateDatabases
     DependsOn: CreateDatabasesFunction
     Properties:
       ServiceToken: !GetAtt CreateDatabasesFunction.Arn
-      WorkgroupName: !Ref WorkgroupName
-      NamespaceName: !Ref NamespaceName
-      EnvType: !Ref EnvType
-      DatabaseUser: !Ref DatabaseUser
-      DatabasePassword: !Ref DatabasePassword
+      # WorkgroupName: !Ref WorkgroupName
+      # NamespaceName: !Ref NamespaceName
+      # EnvType: !Ref EnvType
+      # DatabaseUser: !Ref DatabaseUser
+      # DatabasePassword: !Ref DatabasePassword
 
 Outputs:
   DatabasesCreated:
