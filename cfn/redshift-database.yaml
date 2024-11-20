@@ -1,22 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Creates additional databases in Redshift Serverless
 
-# Parameters:
-#   WorkgroupName:
-#     Type: String
-#     Description: Name of the Redshift Serverless workgroup
-#   NamespaceName:
-#     Type: String
-#     Description: Name of the Redshift Serverless namespace
-#   EnvType:
-#     Type: String
-#     Description: Environment type
-#   DatabaseUser:
-#     Type: String
-#     Description: Database User Name
-#   DatabasePassword:
-#     Type: String
-#     Description: Database Password
+Parameters:
+  WorkgroupName:
+    Type: String
+    Description: Name of the Redshift Serverless workgroup
+  NamespaceName:
+    Type: String
+    Description: Name of the Redshift Serverless namespace
+  EnvType:
+    Type: String
+    Description: Environment type
+  DatabaseUser:
+    Type: String
+    Description: Database User Name
+  DatabasePassword:
+    Type: String
+    Description: Database Password
 
 
 Resources:
@@ -41,38 +41,92 @@ Resources:
                 Action:
                   - redshift-data:ExecuteStatement
                   - redshift-data:DescribeStatement
+                  - redshift-serverless:GetWorkgroup                  
                 Resource: '*'
 
   CreateDatabasesFunction:
     Type: AWS::Lambda::Function
     Properties:
       Runtime: python3.9
-      Handler: lambda_function.lambda_handler 
+      Handler: lambda_function.lambda_handler
       Timeout: 300
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
         ZipFile: |
+          import boto3
           import json
+          import os
+          import time
+          import cfnresponse
           
           def lambda_handler(event, context):
-            # Return a simple message as a response# Return a simple message as a response
-              return {
-                  'statusCode': 200,
-                  'body': json.dumps('Hello')
-              }            
+              try:
+                  # Initialize response data
+                  response_data = {}
+                  
+                  # Get parameters from the event
+                  workgroup_name = event['ResourceProperties']['WorkgroupName']
+                  db_user = event['ResourceProperties']['DatabaseUser']
+                  db_password = event['ResourceProperties']['DatabasePassword']
+                  initial_database = 'nonprod-dev'  # You can parameterize this too if needed
+                  
+                  # Initialize Redshift Data API client
+                  redshift_data = boto3.client('redshift-data')
+                  
+                  # List of databases to create
+                  databases = ['st_db', 'sit_db']
+                  
+                  for database_name in databases:
+                      try:
+                          # SQL query to create a new database
+                          create_db_query = f"CREATE DATABASE {database_name};"
+                          
+                          # Execute the statement
+                          execute_response = redshift_data.execute_statement(
+                              WorkgroupName=workgroup_name,
+                              Database=initial_database,
+                              DbUser=db_user,
+                              Sql=create_db_query
+                          )
+                          
+                          # Wait for the statement to complete
+                          statement_id = execute_response['Id']
+                          while True:
+                              status_response = redshift_data.describe_statement(Id=statement_id)
+                              if status_response['Status'] in ['FINISHED', 'FAILED', 'ABORTED']:
+                                  break
+                              time.sleep(2)
+                          
+                          if status_response['Status'] != 'FINISHED':
+                              error_message = status_response.get('Error', 'Unknown error')
+                              raise Exception(f"Failed to create database {database_name}: {error_message}")
+                          
+                          response_data[database_name] = 'Created successfully'
+                          print(f"Successfully created database: {database_name}")
+                          
+                      except Exception as e:
+                          error_msg = f"Error creating database {database_name}: {str(e)}"
+                          print(error_msg)
+                          response_data[database_name] = f"Failed: {str(e)}"
+                  
+                  # Send success response to CloudFormation
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
+                  
+              except Exception as e:
+                  error_msg = f"Error: {str(e)}"
+                  print(error_msg)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {
+                      'Error': str(e)
+                  })                 
 
   CreateDatabases:
     Type: Custom::CreateDatabases
     DependsOn: CreateDatabasesFunction
     Properties:
       ServiceToken: !GetAtt CreateDatabasesFunction.Arn
-      # WorkgroupName: !Ref WorkgroupName
-      # NamespaceName: !Ref NamespaceName
-      # EnvType: !Ref EnvType
-      # DatabaseUser: !Ref DatabaseUser
-      # DatabasePassword: !Ref DatabasePassword
+      WorkgroupName: !Ref WorkgroupName
+      NamespaceName: !Ref NamespaceName
+      EnvType: !Ref EnvType
+      DatabaseUser: !Ref DatabaseUser
+      DatabasePassword: !Ref DatabasePassword
 
-Outputs:
-  DatabasesCreated:
-    Description: Indicates that databases were created
-    Value: 'Databases creation process completed'
